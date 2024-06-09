@@ -1,0 +1,1 @@
+# emji_diary
