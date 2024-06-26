@@ -1,66 +1,87 @@
-import './App.css';
-import { Outlet } from 'react-router-dom';
-import Button from '@/components/Button';
-import Header from '@/layouts/Header';
-import { useReducer, useRef } from 'react';
-let mockData = [
-    { id: 1, createAt: new Date().getTime(), emotionId: 1, content: '콘텐츠 내용' },
-    { id: 2, createAt: new Date().getTime(), emotionId: 5, content: '콘텐츠 내용' },
-    { id: 3, createAt: new Date().getTime(), emotionId: 3, content: '콘텐츠 내용' },
-    { id: 4, createAt: new Date().getTime(), emotionId: 1, content: '콘텐츠 내용' },
-];
-function reducer(state, actions) {
-    switch (actions.type) {
-        case 'CREATE':
-            return [actions.data, ...state];
-        case 'UPDATE':
-            return [state.map((list) => (list.id === actions.data.id ? { ...actions.data, ...list } : list))];
-        default:
-            break;
-    }
-    return state;
-}
-function App() {
-    const idRef = useRef(5);
-    const [data, dispatch] = useReducer(reducer, mockData);
+import { Outlet } from "react-router-dom";
+import { createContext, useEffect, useReducer, useRef, useState } from "react";
+export const DiaryContext = createContext();
+export const DiaryDispatchContext = createContext();
 
-    //ADD Fun
-    const onCreate = (createAt, emotionId, content) => {
-        dispatch({ type: 'CREATE', data: { id: idRef.current++, createAt, emotionId, content } });
-    };
-    //Edit Fun
-    const onUpdate = (id, emotionId, content) => {
-        dispatch({
-            type: 'UPDATE',
-            data: {
-                id,
-                emotionId,
-                content,
-            },
-        });
-    };
-    return (
-        <>
-            <Button
-                text={'추가'}
-                onClick={() => {
-                    onCreate(new Date().getTime(), 3, '2323');
-                }}
-            />{' '}
-            <Button
-                text={'수정'}
-                onClick={() => {
-                    onUpdate(4, 2, '2323');
-                }}
-            />
-            <Header
-                leftChild={<Button text={'Left'} />}
-                title={<Button text={'Header'} />}
-                rightChild={<Button text={'Right'} />}
-            />
-            <Outlet />
-        </>
-    );
+function reducer(state, actions) {
+  let data;
+  switch (actions.type) {
+    case "INIT":
+      return actions.data;
+    case "CREATE":
+      data = [actions.data, ...state];
+      break;
+    case "UPDATE":
+      data = state.map((list) =>
+        list.id == actions.data.id ? { ...list, ...actions.data } : list
+      );
+      break;
+    case "DELETE":
+      data = state.filter((list) => list.id != actions.data.id);
+      break;
+    default:
+      break;
+  }
+
+  localStorage.setItem("diaryItem", JSON.stringify(data));
+  return data;
+}
+
+function App() {
+  const idRef = useRef(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [data, dispatch] = useReducer(reducer, []);
+
+  useEffect(() => {
+    const storageData = JSON.parse(localStorage.getItem("diaryItem"));
+    if (!storageData) {
+      setIsLoading(false);
+      return;
+    }
+    const maxId = Math.max(...storageData.map((data) => data.id));
+    idRef.current = maxId;
+    dispatch({ type: "INIT", data: storageData });
+    setIsLoading(false);
+  }, []);
+
+  //ADD Fun
+  const onCreate = (createAt, emotionId, content) => {
+    dispatch({
+      type: "CREATE",
+      data: { id: ++idRef.current, createAt, emotionId, content },
+    });
+  };
+  //Edit Fun
+  const onUpdate = (id, emotionId, content) => {
+    dispatch({
+      type: "UPDATE",
+      data: {
+        id,
+        emotionId,
+        content,
+      },
+    });
+  };
+
+  //Delete Fun
+  const onDelete = (id) => {
+    dispatch({
+      type: "DELETE",
+      data: { id },
+    });
+  };
+
+  if (isLoading) {
+    return;
+  }
+
+  return (
+    <DiaryContext.Provider value={data}>
+      <DiaryDispatchContext.Provider value={{ onCreate, onUpdate, onDelete }}>
+        <Outlet />
+      </DiaryDispatchContext.Provider>
+    </DiaryContext.Provider>
+  );
 }
 
 export default App;

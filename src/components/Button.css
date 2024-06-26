@@ -8,6 +8,11 @@
     white-space: nowrap;
 }
 
+.Button:disabled {
+    background-color: #ccc;
+    cursor:no-drop
+}
+
 .Button_POSITIVE {
     background-color: rgb(100, 201, 100);
     color: white;
