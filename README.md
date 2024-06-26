@@ -1,8 +1,8 @@
-# React + Vite
+1. 프로젝트 설명 : 감정과 함께 자신의 일기를 작성할 수 있는 '감정 일기장' 입니다.
+2. 사용언어 : React.js 
+3. 상태관리 : context API
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+작성한 데이터들은 localstorage 에 저장하여 유지합니다.
 
-Currently, two official plugins are available:
-
--   [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
--   [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+URL : https://my-emotion-diary.vercel.app
+배포 환경 : vercel
